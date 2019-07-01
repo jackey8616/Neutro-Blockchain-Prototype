@@ -2,6 +2,7 @@ import socket
 socket.SO_REUSEPORT = 15
 
 
+from atomic_p2p.peer.communication import MessageHandler
 from neutro.src.p2p.p2p_api import *
 from neutro.src.chain.transaction import Transaction
 

@@ -2,7 +2,6 @@ import socket
 socket.SO_REUSEPORT = 15
 
 from typing import List, Tuple, Dict
-from atomic_p2p.peer import Peer
 from atomic_p2p.peer.entity.peer_info import PeerInfo
 import os
 from os import getcwd
@@ -10,6 +9,8 @@ from os.path import join
 from atomic_p2p.utils.security import self_hash as sh, create_self_signed_cert
 from neutro.src.p2p.peer_database import store_neighbors
 from neutro.src.p2p.peer_database import get_neighbors
+from .peer import Peer
+from .handler import SyncHandler
 import re
 import time
 
@@ -82,14 +83,20 @@ def send_broadcast(nodes, from_node, json_transaction_message: str):
 
             # sends a broadcast transaction message from a node to other
             # directly connected nodes except the core node
-            nodes[nds].onProcess(
-                ['send', 'broadcast:sw', json_transaction_message])
+            nodes[nds].handler_broadcast_packet(
+                host=(None, "sw"), pkt_type=SyncHandler.pkt_type, **{
+                    "msg": json_transaction_message
+                })
+            
 
     indirect_nodes_of(from_node.server_info.name)
 
     # send a broadcast transaction message from core to all the directly
     # connected nodes
-    from_node.onProcess(['send', 'broadcast:sw', json_transaction_message])
+    from_node.handler_broadcast_packet(
+        host=(None, "sw"), pkt_type=SyncHandler.pkt_type, **{
+            "msg": json_transaction_message
+        })
 
 
 def send_transaction_direct(json_string_transaction: str, from_peer, to_peer):
